@@ -7,9 +7,10 @@ namespace Workbench\App\Providers;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Dashboard;
 use Laravel\Nova\Dashboards\Main;
-use Laravel\Nova\DevTool\DevTool as Nova;
+use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
 use Laravel\Nova\Tool;
+use Workbench\App\Nova\User;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
 {
@@ -20,11 +21,17 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
     protected function routes(): void
     {
-        Nova::routes()
+        // Kept to the API shared by Nova 4 and 5 so the workbench boots on both
+        // majors. withoutEmailVerificationRoutes() is Nova 5 only, so guard it.
+        $registration = Nova::routes()
             ->withAuthenticationRoutes(default: true)
-            ->withPasswordResetRoutes()
-            ->withoutEmailVerificationRoutes()
-            ->register();
+            ->withPasswordResetRoutes();
+
+        if (method_exists($registration, 'withoutEmailVerificationRoutes')) {
+            $registration->withoutEmailVerificationRoutes();
+        }
+
+        $registration->register();
     }
 
     protected function gate(): void
@@ -52,6 +59,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
     protected function resources(): void
     {
-        Nova::resourcesInWorkbench();
+        Nova::resources([
+            User::class,
+        ]);
     }
 }

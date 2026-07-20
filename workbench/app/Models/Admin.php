@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace Workbench\App\Models;
 
-use BBSLab\NovaPasswordRotation\Concerns\RotatesPassword;
-use BBSLab\NovaPasswordRotation\Contracts\MustRotatePassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Workbench\Database\Factories\UserFactory;
+use Workbench\Database\Factories\AdminFactory;
 
-class User extends Authenticatable implements MustRotatePassword
+/**
+ * A second authenticatable that intentionally does NOT implement
+ * MustRotatePassword, used to prove the middleware only enforces rotation on
+ * models that opt in.
+ */
+class Admin extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, RotatesPassword;
+    /** @use HasFactory<AdminFactory> */
+    use HasFactory;
+
+    protected $table = 'admins';
 
     /**
      * @var list<string>
@@ -39,7 +43,6 @@ class User extends Authenticatable implements MustRotatePassword
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

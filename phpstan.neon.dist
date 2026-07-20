@@ -5,4 +5,9 @@ parameters:
     level: 8
     paths:
         - src
+        # The RotatesPassword trait's only consumer is the workbench User model;
+        # analysing it keeps PHPStan from flagging the trait as unused. Nova
+        # resources (workbench/app/Nova) are excluded: their fluent field API
+        # trips level 8 without the dedicated Nova PHPStan extension.
+        - workbench/app/Models
     tmpDir: build/phpstan

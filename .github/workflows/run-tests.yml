@@ -1,0 +1,50 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Primary target: latest everything, enforces 100% coverage.
+          - { name: 'Nova 5 / Laravel 13 / PHP 8.4', php: '8.4', nova: '^5.0', extra: '', coverage: true }
+          # Nova 5 on the newest PHP.
+          - { name: 'Nova 5 / Laravel 13 / PHP 8.5', php: '8.5', nova: '^5.0', extra: '', coverage: false }
+          # Nova 5 on the lowest supported Laravel.
+          - { name: 'Nova 5 / Laravel 11 / PHP 8.4', php: '8.4', nova: '^5.0', extra: '--with=orchestra/testbench:^9.0', coverage: false }
+          # Nova 4 (its Inertia dependency caps PHP at 8.4 and Laravel at 11).
+          - { name: 'Nova 4 / Laravel 11 / PHP 8.4', php: '8.4', nova: '^4.0', extra: '--with=orchestra/testbench:^9.0 --with-all-dependencies', coverage: false }
+
+    name: ${{ matrix.name }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, bcmath, intl, fileinfo
+          coverage: pcov
+
+      - name: Authenticate Nova
+        run: composer config http-basic.nova.laravel.com "${{ secrets.NOVA_USERNAME }}" "${{ secrets.NOVA_LICENSE_KEY }}"
+
+      - name: Install Composer dependencies
+        run: composer update --with="laravel/nova:${{ matrix.nova }}" ${{ matrix.extra }} --prefer-dist --no-interaction --no-progress
+
+      - name: Run tests
+        run: ${{ matrix.coverage && 'composer test-coverage' || 'vendor/bin/pest' }}

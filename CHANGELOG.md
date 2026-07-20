@@ -2,19 +2,45 @@
 
 All notable changes to `bbs-lab/nova-password-rotation` will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## v1.0.0 — Initial release - 2026-07-20
 
-## [Unreleased]
+First stable release of **Nova Password Rotation** — force any authenticatable implementing `MustRotatePassword` to rotate its password every N days. When the password expires, a [Laravel Nova](https://nova.laravel.com) middleware redirects the logged-in user to a native, Nova-styled change-password screen. Light, secure, and works almost out of the box on **Nova 4 and Nova 5**.
 
-### Added
+### ✨ Features
 
-- Initial release.
-- `MustRotatePassword` interface and `RotatesPassword` trait for any authenticatable model.
-- `EnsurePasswordIsNotExpired` Nova middleware with automatic registration.
-- Native Nova-styled expired-password change screen.
-- Polymorphic password history with reuse prevention (`PasswordNotReused` rule).
-- First-login enforcement and expiry warning Nova notification.
-- `password-rotation:report` Artisan command.
-- `PasswordRotated` event.
-- English and French translations.
+- **Interface-driven** — `MustRotatePassword` interface + `RotatesPassword` trait on any authenticatable (not tied to `User`); auto-stamps the timestamp on every password change
+- **Forced rotation** — configurable period (`days`); expired users are redirected to a native, Nova-styled change screen
+- **Auto-registered middleware** — `EnsurePasswordIsNotExpired` wired into Nova for you, robust across Nova 4 (inline `config('nova.middleware')`) and Nova 5 (the `nova` router group), gated by config and de-duplicated
+- **Reuse prevention** — polymorphic password history rejects the last N passwords (reusable `PasswordNotReused` rule)
+- **First-login enforcement** — a `null` timestamp counts as expired, so admin-provisioned accounts must set their own password
+- **Expiry warning** — best-effort Nova notification within a configurable window, at most once per day
+- **Tooling** — `password-rotation:report` Artisan command and a `PasswordRotated` event
+- **i18n & config** — English & French translations, publishable; every setting is environment-driven
+
+### ✅ Quality
+
+- **100% line coverage**, mutation tested (**MSI 89%**), PHPStan level 8, Pint
+- Verified in CI on **Nova 5** (Laravel 11/12/13, PHP 8.4/8.5) and **Nova 4** (Laravel 11, PHP 8.4)
+
+### 📦 Requirements
+
+PHP `^8.4` · Laravel Nova `^4.0 || ^5.0` · Laravel `^11.0 || ^12.0 || ^13.0`
+
+> Nova 4 (through its Inertia dependency) tops out at PHP 8.4 and Laravel 11; on PHP 8.5 or Laravel 12+, use Nova 5.
+
+### 🚀 Installation
+
+```bash
+composer require bbs-lab/nova-password-rotation
+```
+
+```php
+use BBSLab\NovaPasswordRotation\Concerns\RotatesPassword;
+use BBSLab\NovaPasswordRotation\Contracts\MustRotatePassword;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+class User extends Authenticatable implements MustRotatePassword
+{
+    use RotatesPassword;
+}
+```

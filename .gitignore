@@ -1,0 +1,13 @@
+/build
+/vendor
+/node_modules
+.superpowers/
+.DS_Store
+composer.phar
+composer.lock
+phpunit.xml
+auth.json
+.idea/
+/coverage
+.phpunit.result.cache
+.phpunit.cache

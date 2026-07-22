@@ -44,7 +44,7 @@ The rotatable subject is **not** tied to the `User` model: everything keys off t
 
 ## Requirements
 
-- PHP `^8.4`
+- PHP `^8.2`
 - Laravel Nova `^4.0 || ^5.0`
 - Laravel `^11.0 || ^12.0 || ^13.0`
 
@@ -239,7 +239,9 @@ cast, so passwords stay single-hashed. If you discover a security issue, please 
 
 ## Filament
 
-A Filament twin of this package is planned.
+Using [Filament](https://filamentphp.com) instead of Nova? Its twin,
+[`bbs-lab/filament-password-rotation`](https://github.com/BBS-Lab/filament-password-rotation), brings
+the same password rotation to Filament panels.
 
 ## Changelog
 

@@ -12,6 +12,22 @@ The rotatable subject is **not** tied to the `User` model: everything keys off t
 `MustRotatePassword` interface on whatever user Nova authenticated, and the password history is
 **polymorphic**, so any model works.
 
+## Screenshots
+
+> Each screenshot is split diagonally: **light theme** (top-left) / **dark theme** (bottom-right).
+
+**Forced password-change screen** — shown when a password has expired:
+
+![Forced password-change screen](art/forced-change.png)
+
+**Expiry warning** — a Nova notification while the password nears expiry:
+
+![Expiry warning notification](art/expiry-warning.png)
+
+**Sign-in screen**
+
+![Sign-in screen](art/login.png)
+
 ## Features
 
 - 🔒 Forces a password change once the current one is older than `days`

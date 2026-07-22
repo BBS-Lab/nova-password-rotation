@@ -12,7 +12,13 @@ return new class extends Migration
     {
         Schema::create('password_histories', function (Blueprint $table): void {
             $table->id();
-            $table->morphs('authenticatable');
+
+            match (config('nova-password-rotation.morph_key_type')) {
+                'uuid' => $table->uuidMorphs('authenticatable'),
+                'ulid' => $table->ulidMorphs('authenticatable'),
+                default => $table->morphs('authenticatable'),
+            };
+
             $table->string('password');
             $table->timestamp('created_at')->nullable();
         });

@@ -109,6 +109,7 @@ Every key lives in `config/nova-password-rotation.php` and is driven by an envir
 | Config key                 | Env var                              | Default                | Description                                                                                                    |
 | -------------------------- | ------------------------------------ | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `enabled`                  | `PASSWORD_ROTATION_ENABLED`          | `true`                 | Master switch. When `false` the package is inert: no forced change, no warnings.                               |
+| `morph_key_type`           | `PASSWORD_ROTATION_MORPH_KEY_TYPE`   | `null`                 | Key type for the password-history `authenticatable_id` column. Set to `uuid`/`ulid` for string-keyed users; `null` follows Laravel's default.|
 | `auto_register_middleware` | `PASSWORD_ROTATION_AUTO_MIDDLEWARE`  | `true`                 | Append the middleware to `config('nova.middleware')` automatically. Disable to register it yourself.           |
 | `days`                     | `PASSWORD_ROTATION_DAYS`             | `90`                   | How many days a password stays valid, counted from the rotation column.                                        |
 | `column`                   | `PASSWORD_ROTATION_COLUMN`           | `password_changed_at`  | The timestamp column storing when the password last changed. Override per model via `passwordRotationColumn()`.|

@@ -19,6 +19,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Password history morph key type
+    |--------------------------------------------------------------------------
+    |
+    | The key type for the "password_histories.authenticatable_id" column. Leave
+    | null to follow Laravel's global default (Schema::defaultMorphKeyType()),
+    | which is a BIGINT unless you have switched it. Set to "uuid" or "ulid" if
+    | your authenticatable uses string primary keys, so the migration provisions
+    | a matching column instead of silently truncating string keys.
+    |
+    */
+
+    'morph_key_type' => env('PASSWORD_ROTATION_MORPH_KEY_TYPE'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Automatic Nova middleware registration
     |--------------------------------------------------------------------------
     |

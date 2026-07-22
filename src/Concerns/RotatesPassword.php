@@ -21,7 +21,7 @@ trait RotatesPassword
 {
     public function passwordRotationColumn(): string
     {
-        return (string) config('nova-password-rotation.column');
+        return (string) config('nova-password-rotation.column', 'password_changed_at');
     }
 
     public function initializeRotatesPassword(): void

@@ -2,6 +2,23 @@
 
 All notable changes to `bbs-lab/nova-password-rotation` will be documented in this file.
 
+## v1.0.1 - 2026-07-22
+
+Maintenance release — configurable morph key type for the password history, plus documentation polish.
+
+### ✨ Added
+
+- **Configurable morph key type** — new `morph_key_type` config option (env `PASSWORD_ROTATION_MORPH_KEY_TYPE`) so the polymorphic `password_histories.authenticatable_id` column can be provisioned as `uuid` or `ulid` for string-keyed authenticatables instead of the default BIGINT. Leave it `null` to follow Laravel's `Schema::defaultMorphKeyType()`.
+
+### 🔧 Changed
+
+- `config('nova-password-rotation.column')` now falls back to `password_changed_at` in both the `RotatesPassword` trait and the publishable user-migration stub, so a missing config key never yields an empty column name.
+
+### 📚 Documentation
+
+- Added light/dark showcase screenshots (forced-change screen, expiry notification, sign-in) to the README.
+- Corrected the `LICENSE` copyright holder (was a leftover skeleton placeholder).
+
 ## v1.0.0 — Initial release - 2026-07-20
 
 First stable release of **Nova Password Rotation** — force any authenticatable implementing `MustRotatePassword` to rotate its password every N days. When the password expires, a [Laravel Nova](https://nova.laravel.com) middleware redirects the logged-in user to a native, Nova-styled change-password screen. Light, secure, and works almost out of the box on **Nova 4 and Nova 5**.
@@ -32,8 +49,8 @@ PHP `^8.4` · Laravel Nova `^4.0 || ^5.0` · Laravel `^11.0 || ^12.0 || ^13.0`
 
 ```bash
 composer require bbs-lab/nova-password-rotation
-```
 
+```
 ```php
 use BBSLab\NovaPasswordRotation\Concerns\RotatesPassword;
 use BBSLab\NovaPasswordRotation\Contracts\MustRotatePassword;
@@ -43,4 +60,5 @@ class User extends Authenticatable implements MustRotatePassword
 {
     use RotatesPassword;
 }
+
 ```

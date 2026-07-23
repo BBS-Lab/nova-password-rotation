@@ -2,6 +2,23 @@
 
 All notable changes to `bbs-lab/nova-password-rotation` will be documented in this file.
 
+## v1.0.2 - 2026-07-23
+
+Compatibility & maintenance release — wider PHP support and CI coverage. Fully backward compatible.
+
+### 🔧 Changed
+
+- **Minimum PHP lowered to `^8.2`** (from `^8.4`). The rotation domain runs on PHP 8.2+, so the package no longer forces 8.4 — install it on any supported Laravel (11/12/13) running PHP 8.2 or newer. (Nova 4 still tops out at PHP 8.4 / Laravel 11 through its Inertia dependency; Composer resolves the right combination for you.)
+
+### 👷 CI
+
+- Broadened the test matrix to **Nova 4 & 5 × Laravel 11/12/13 × PHP 8.3/8.4/8.5**. The runtime floor is PHP 8.2, but Pest 4 (dev) requires 8.3, so 8.3 is the lowest PHP the CI can exercise.
+- Bumped `actions/checkout` to v7.
+
+### 📚 Documentation
+
+- The README now cross-references the (now released) Filament twin, [`bbs-lab/filament-password-rotation`](https://github.com/BBS-Lab/filament-password-rotation).
+
 ## v1.0.1 - 2026-07-22
 
 Maintenance release — configurable morph key type for the password history, plus documentation polish.
@@ -50,6 +67,7 @@ PHP `^8.4` · Laravel Nova `^4.0 || ^5.0` · Laravel `^11.0 || ^12.0 || ^13.0`
 ```bash
 composer require bbs-lab/nova-password-rotation
 
+
 ```
 ```php
 use BBSLab\NovaPasswordRotation\Concerns\RotatesPassword;
@@ -60,5 +78,6 @@ class User extends Authenticatable implements MustRotatePassword
 {
     use RotatesPassword;
 }
+
 
 ```

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace BBSLab\NovaPasswordRotation\Http\Middleware;
 
-use BBSLab\NovaPasswordRotation\Contracts\MustRotatePassword;
+use BBSLab\LaravelPasswordRotation\Contracts\MustRotatePassword;
 use Closure;
 use Illuminate\Http\Request;
 use Laravel\Nova\Nova;
@@ -17,7 +17,7 @@ class EnsurePasswordIsNotExpired
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! config('nova-password-rotation.enabled')) {
+        if (! config('laravel-password-rotation.enabled')) {
             return $next($request);
         }
 

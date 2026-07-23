@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use BBSLab\NovaPasswordRotation\Contracts\MustRotatePassword;
+use BBSLab\LaravelPasswordRotation\Contracts\MustRotatePassword;
 use Carbon\CarbonInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
@@ -16,10 +16,10 @@ use Workbench\Database\Factories\UserFactory;
 uses(RefreshDatabase::class);
 
 beforeEach(fn () => config([
-    'nova-password-rotation.enabled' => true,
-    'nova-password-rotation.days' => 90,
-    'nova-password-rotation.warn_days' => 7,
-    'nova-password-rotation.force_on_first_login' => true,
+    'laravel-password-rotation.enabled' => true,
+    'laravel-password-rotation.days' => 90,
+    'laravel-password-rotation.warn_days' => 7,
+    'laravel-password-rotation.force_on_first_login' => true,
 ]));
 
 function serve(mixed $user): void
@@ -72,7 +72,7 @@ it('sends a Nova warning notification carrying the expiry date', function (): vo
 
 it('warns exactly one day before expiry when the warning window is one day', function (): void {
     $this->freezeTime();
-    config(['nova-password-rotation.warn_days' => 1]);
+    config(['laravel-password-rotation.warn_days' => 1]);
 
     // days = 90, so this account expires in exactly one day: on the boundary.
     $user = UserFactory::new()->create(['password_changed_at' => now()->subDays(89)]);
@@ -101,7 +101,7 @@ it('does not warn outside the warning window', function (): void {
 });
 
 it('does not warn when the feature is disabled', function (): void {
-    config(['nova-password-rotation.enabled' => false]);
+    config(['laravel-password-rotation.enabled' => false]);
 
     $user = UserFactory::new()->create(['password_changed_at' => now()->subDays(85)]);
 
@@ -111,7 +111,7 @@ it('does not warn when the feature is disabled', function (): void {
 });
 
 it('does not warn when the warning window is disabled', function (): void {
-    config(['nova-password-rotation.warn_days' => 0]);
+    config(['laravel-password-rotation.warn_days' => 0]);
 
     $user = UserFactory::new()->create(['password_changed_at' => now()->subDays(85)]);
 
@@ -122,7 +122,7 @@ it('does not warn when the warning window is disabled', function (): void {
 
 it('does not warn at the exact expiry moment when the warning window is disabled', function (): void {
     $this->freezeTime();
-    config(['nova-password-rotation.warn_days' => 0]);
+    config(['laravel-password-rotation.warn_days' => 0]);
 
     // Expires exactly now (days = 90): still not "past", so passwordHasExpired()
     // lets us through, and the L139 window check (now < expiry) cannot fire
@@ -152,7 +152,7 @@ it('does not warn a user that does not implement the interface', function (): vo
 });
 
 it('does not warn when expiry cannot be determined', function (): void {
-    config(['nova-password-rotation.force_on_first_login' => false]);
+    config(['laravel-password-rotation.force_on_first_login' => false]);
 
     // Null timestamp + force_on_first_login off: not expired, yet no expiry date.
     $user = UserFactory::new()->create();
@@ -191,6 +191,11 @@ it('swallows notification failures (best-effort delivery)', function (): void {
         public function passwordHasExpired(): bool
         {
             return false;
+        }
+
+        public function passwordIsExpiring(): bool
+        {
+            return true;
         }
 
         public function notify(mixed $notification): never
@@ -232,6 +237,11 @@ it('does not warn a rotatable user that cannot be notified', function (): void {
         public function passwordHasExpired(): bool
         {
             return false;
+        }
+
+        public function passwordIsExpiring(): bool
+        {
+            return true;
         }
     };
 

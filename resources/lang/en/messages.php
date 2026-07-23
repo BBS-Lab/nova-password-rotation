@@ -20,4 +20,10 @@ return [
 
     'warning' => 'Your password expires on :date. Please update it soon.',
 
+    'reset_intro' => 'Your password has expired. Request a reset link and we will email you instructions to set a new one.',
+
+    'reset_submit' => 'Send password reset link',
+
+    'reset_sent' => 'We have emailed you a password reset link.',
+
 ];

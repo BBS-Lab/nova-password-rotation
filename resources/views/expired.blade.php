@@ -26,6 +26,26 @@
         <h1 class="text-3xl font-bold text-center text-gray-900 dark:text-white">{{ $novaName }}</h1>
     </div>
 
+    @if (config('nova-password-rotation.expiry_action') === 'reset')
+    <form
+        method="POST"
+        action="{{ route('nova-password-rotation.expired.reset') }}"
+        class="bg-white dark:bg-gray-800 shadow rounded-lg p-8 w-[25rem] mx-auto"
+    >
+        @csrf
+
+        <h2 class="text-2xl text-center font-normal mb-6">{{ trans('nova-password-rotation::messages.title') }}</h2>
+
+        <p class="mb-6 text-center">{{ trans('nova-password-rotation::messages.reset_intro') }}</p>
+
+        <button
+            type="submit"
+            class="w-full flex justify-center shadow rounded focus:outline-none focus:ring bg-primary-500 hover:bg-primary-400 active:bg-primary-600 text-white dark:text-gray-900 px-3 h-9 items-center text-sm font-bold"
+        >
+            {{ trans('nova-password-rotation::messages.reset_submit') }}
+        </button>
+    </form>
+    @else
     <form
         method="POST"
         action="{{ route('nova-password-rotation.expired.update') }}"
@@ -45,7 +65,7 @@
             </div>
         @endif
 
-        @if (config('nova-password-rotation.require_current_password'))
+        @if (config('laravel-password-rotation.require_current_password'))
             <div class="mb-6">
                 <label class="block mb-2" for="current_password">{{ trans('nova-password-rotation::messages.current_password') }}</label>
                 <input
@@ -90,6 +110,7 @@
             {{ trans('nova-password-rotation::messages.submit') }}
         </button>
     </form>
+    @endif
 </div>
 </body>
 </html>

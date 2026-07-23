@@ -10,3 +10,6 @@ Route::get('expired', [PasswordRotationController::class, 'show'])
 
 Route::post('expired', [PasswordRotationController::class, 'update'])
     ->name('nova-password-rotation.expired.update');
+
+Route::post('expired/reset', [PasswordRotationController::class, 'reset'])
+    ->name('nova-password-rotation.expired.reset');

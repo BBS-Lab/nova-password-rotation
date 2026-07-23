@@ -20,4 +20,10 @@ return [
 
     'warning' => 'Votre mot de passe expire le :date. Merci de le mettre à jour prochainement.',
 
+    'reset_intro' => 'Votre mot de passe a expiré. Demandez un lien de réinitialisation et nous vous enverrons par e-mail les instructions pour en définir un nouveau.',
+
+    'reset_submit' => 'Envoyer le lien de réinitialisation',
+
+    'reset_sent' => 'Nous vous avons envoyé un lien de réinitialisation par e-mail.',
+
 ];

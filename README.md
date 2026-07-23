@@ -61,18 +61,27 @@ Because Nova is a paid, private package, make sure your application is already a
 composer require bbs-lab/nova-password-rotation
 ```
 
-The service provider auto-registers via Laravel package discovery. The `password_histories` migration
-runs automatically. Publish the config and translations if you want to tweak them:
+The service provider auto-registers via Laravel package discovery. It builds on
+[`bbs-lab/laravel-password-rotation`](https://github.com/BBS-Lab/laravel-password-rotation), which owns
+the generic rotation domain (the interface, trait, history model, rule, event and report command);
+Composer pulls it in automatically and its `password_histories` migration runs on install. Publish what
+you want to tweak:
 
 ```bash
-# Config
+# Nova-specific config (middleware registration, route prefix, expiry action)
 php artisan vendor:publish --tag=nova-password-rotation-config
 
-# Translations (en, fr)
+# Shared rotation config (days, history, column, …)
+php artisan vendor:publish --tag=laravel-password-rotation-config
+
+# Nova UI translations (en, fr)
 php artisan vendor:publish --tag=nova-password-rotation-translations
 
+# Shared validation translations (en, fr)
+php artisan vendor:publish --tag=laravel-password-rotation-translations
+
 # The users-table migration stub (adds the rotation column) — edit it per table before migrating
-php artisan vendor:publish --tag=nova-password-rotation-user-migration
+php artisan vendor:publish --tag=laravel-password-rotation-user-migration
 
 php artisan migrate
 ```
@@ -86,8 +95,8 @@ the correct table if your rotatable model is not `users`.
 Add the interface and trait to the authenticatable model you want to rotate:
 
 ```php
-use BBSLab\NovaPasswordRotation\Concerns\RotatesPassword;
-use BBSLab\NovaPasswordRotation\Contracts\MustRotatePassword;
+use BBSLab\LaravelPasswordRotation\Concerns\RotatesPassword;
+use BBSLab\LaravelPasswordRotation\Contracts\MustRotatePassword;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements MustRotatePassword
@@ -104,21 +113,31 @@ done — expired users are redirected on their next full page load in Nova.
 
 ## Configuration
 
-Every key lives in `config/nova-password-rotation.php` and is driven by an environment variable.
+The generic rotation keys live in the base package's `config/laravel-password-rotation.php`; the
+Nova-specific keys live in this package's `config/nova-password-rotation.php`. Each is driven by an
+environment variable.
+
+**Shared rotation keys** (`config/laravel-password-rotation.php`, from `bbs-lab/laravel-password-rotation`):
 
 | Config key                 | Env var                              | Default                | Description                                                                                                    |
 | -------------------------- | ------------------------------------ | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `enabled`                  | `PASSWORD_ROTATION_ENABLED`          | `true`                 | Master switch. When `false` the package is inert: no forced change, no warnings.                               |
 | `morph_key_type`           | `PASSWORD_ROTATION_MORPH_KEY_TYPE`   | `null`                 | Key type for the password-history `authenticatable_id` column. Set to `uuid`/`ulid` for string-keyed users; `null` follows Laravel's default.|
-| `auto_register_middleware` | `PASSWORD_ROTATION_AUTO_MIDDLEWARE`  | `true`                 | Append the middleware to `config('nova.middleware')` automatically. Disable to register it yourself.           |
 | `days`                     | `PASSWORD_ROTATION_DAYS`             | `90`                   | How many days a password stays valid, counted from the rotation column.                                        |
 | `column`                   | `PASSWORD_ROTATION_COLUMN`           | `password_changed_at`  | The timestamp column storing when the password last changed. Override per model via `passwordRotationColumn()`.|
 | `force_on_first_login`     | `PASSWORD_ROTATION_FORCE_FIRST_LOGIN`| `true`                 | Treat a `null` timestamp as expired, so provisioned accounts must set their own password.                      |
 | `require_current_password` | `PASSWORD_ROTATION_REQUIRE_CURRENT`  | `true`                 | Require confirmation of the current password on the change screen.                                             |
 | `history_count`            | `PASSWORD_ROTATION_HISTORY_COUNT`    | `3`                    | Number of previous (hashed) passwords remembered and rejected. `0` disables history entirely.                  |
-| `warn_days`                | `PASSWORD_ROTATION_WARN_DAYS`        | `7`                    | Show a Nova notice this many days before expiry. `0` disables the warning.                                     |
-| `route_prefix`             | `PASSWORD_ROTATION_ROUTE_PREFIX`     | `password-rotation`    | The change screen lives at `{nova}/{prefix}/expired`. Change only on a route collision.                        |
+| `warn_days`                | `PASSWORD_ROTATION_WARN_DAYS`        | `7`                    | Warn a user this many days before expiry. `0` disables the warning.                                            |
 | `models`                   | —                                    | `['App\Models\User']`  | Models scanned by `password-rotation:report`. The middleware does **not** use this list.                       |
+
+**Nova-specific keys** (`config/nova-password-rotation.php`, this package):
+
+| Config key                 | Env var                              | Default                | Description                                                                                                    |
+| -------------------------- | ------------------------------------ | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `auto_register_middleware` | `PASSWORD_ROTATION_AUTO_MIDDLEWARE`  | `true`                 | Append the middleware to `config('nova.middleware')` automatically. Disable to register it yourself.           |
+| `route_prefix`             | `PASSWORD_ROTATION_ROUTE_PREFIX`     | `password-rotation`    | The change screen lives at `{nova}/{prefix}/expired`. Change only on a route collision.                        |
+| `expiry_action`            | `PASSWORD_ROTATION_EXPIRY_ACTION`    | `change`               | What the expired-password screen does: `change` shows the in-panel change form; `reset` emails a reset link and signs the user out. |
 
 > The `models` array only feeds the report command. The middleware works off the interface on the
 > authenticated user, so any model is enforced regardless of this list.
@@ -136,6 +155,12 @@ successful update the user is sent back to the Nova dashboard with a success fla
 Because the middleware runs on Nova's **web** stack only, a mid-session expiry takes effect on the
 next full page load — which is acceptable and avoids breaking XHR requests.
 
+With `expiry_action` set to `reset`, the screen shows a single **Send password reset link** button
+instead of the change form. Submitting it emails a standard Laravel password reset link (default
+broker), signs the user out of the Nova guard (so the emailed guest link is reachable) and redirects to
+the Nova login. Nova's login is a Vue SPA, so the "reset link sent" confirmation cannot be shown as a
+Nova toast — the email is the real signal.
+
 ### Reuse prevention
 
 When `history_count > 0`, every password change is hashed and stored in the polymorphic
@@ -143,7 +168,7 @@ When `history_count > 0`, every password change is hashed and stored in the poly
 those previous passwords, and always rejects reusing the current one. You can reuse the rule directly:
 
 ```php
-use BBSLab\NovaPasswordRotation\Rules\PasswordNotReused;
+use BBSLab\LaravelPasswordRotation\Rules\PasswordNotReused;
 
 $request->validate([
     'password' => ['required', 'confirmed', new PasswordNotReused($user)],
@@ -164,7 +189,7 @@ installed, it is silently skipped and Nova keeps working.
 
 ### The `password-rotation:report` command
 
-Audit the accounts declared in `config('nova-password-rotation.models')`:
+Audit the accounts declared in `config('laravel-password-rotation.models')`:
 
 ```bash
 # Only accounts that are expired or expiring within warn_days
@@ -183,7 +208,7 @@ Dispatched after a password change is persisted (not on the initial create). Lis
 notify, or revoke sessions:
 
 ```php
-use BBSLab\NovaPasswordRotation\Events\PasswordRotated;
+use BBSLab\LaravelPasswordRotation\Events\PasswordRotated;
 use Illuminate\Support\Facades\Event;
 
 Event::listen(function (PasswordRotated $event) {
@@ -245,7 +270,8 @@ the same password rotation to Filament panels.
 
 ## Changelog
 
-Please see [CHANGELOG](CHANGELOG.md) for what has changed recently.
+Please see [CHANGELOG](CHANGELOG.md) for what has changed recently. Upgrading from v1.x? See
+[UPGRADE.md](UPGRADE.md).
 
 ## Contributing
 

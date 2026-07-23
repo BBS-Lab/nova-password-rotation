@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use BBSLab\NovaPasswordRotation\Contracts\MustRotatePassword;
+use BBSLab\LaravelPasswordRotation\Contracts\MustRotatePassword;
 use BBSLab\NovaPasswordRotation\Http\Middleware\EnsurePasswordIsNotExpired;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
@@ -48,7 +48,7 @@ it('ignores users that do not implement the interface', function (): void {
 });
 
 it('is inert when the feature is disabled', function (): void {
-    config(['nova-password-rotation.enabled' => false]);
+    config(['laravel-password-rotation.enabled' => false]);
 
     $this->actingAs(expiredUser())
         ->get('/nova/panel')
@@ -57,7 +57,7 @@ it('is inert when the feature is disabled', function (): void {
 });
 
 it('lets a self-declared expired user through when the feature is disabled', function (): void {
-    config(['nova-password-rotation.enabled' => false]);
+    config(['laravel-password-rotation.enabled' => false]);
 
     // A user that reports itself expired regardless of config; only the
     // middleware's own "disabled" short-circuit can let this request through.

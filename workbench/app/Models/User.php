@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Workbench\App\Models;
 
-use BBSLab\NovaPasswordRotation\Concerns\RotatesPassword;
-use BBSLab\NovaPasswordRotation\Contracts\MustRotatePassword;
+use BBSLab\LaravelPasswordRotation\Concerns\RotatesPassword;
+use BBSLab\LaravelPasswordRotation\Contracts\MustRotatePassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;

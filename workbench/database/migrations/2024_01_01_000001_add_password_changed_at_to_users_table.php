@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $column = (string) config('nova-password-rotation.column');
+        $column = (string) config('laravel-password-rotation.column');
 
         Schema::table('users', function (Blueprint $table) use ($column): void {
             $table->timestamp($column)->nullable()->after('password');
@@ -19,7 +19,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        $column = (string) config('nova-password-rotation.column');
+        $column = (string) config('laravel-password-rotation.column');
 
         Schema::table('users', function (Blueprint $table) use ($column): void {
             $table->dropColumn($column);

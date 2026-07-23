@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace BBSLab\NovaPasswordRotation;
 
-use BBSLab\NovaPasswordRotation\Console\Commands\PasswordRotationReport;
-use BBSLab\NovaPasswordRotation\Contracts\MustRotatePassword;
+use BBSLab\LaravelPasswordRotation\Contracts\MustRotatePassword;
 use BBSLab\NovaPasswordRotation\Http\Middleware\EnsurePasswordIsNotExpired;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
@@ -26,10 +25,7 @@ class NovaPasswordRotationServiceProvider extends PackageServiceProvider
             ->name('nova-password-rotation')
             ->hasConfigFile()
             ->hasTranslations()
-            ->hasViews()
-            ->hasMigration('create_password_histories_table')
-            ->runsMigrations()
-            ->hasCommand(PasswordRotationReport::class);
+            ->hasViews();
     }
 
     public function packageRegistered(): void
@@ -59,12 +55,6 @@ class NovaPasswordRotationServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        $this->publishes([
-            __DIR__.'/../database/migrations/add_password_changed_at_to_users_table.php.stub' => database_path(
-                'migrations/'.date('Y_m_d_His').'_add_password_changed_at_to_users_table.php'
-            ),
-        ], 'nova-password-rotation-user-migration');
-
         Route::group([
             'prefix' => trim(Nova::path(), '/').'/'.config('nova-password-rotation.route_prefix'),
             // DispatchServingNovaEvent fires the ServingNova event that configures
@@ -108,7 +98,7 @@ class NovaPasswordRotationServiceProvider extends PackageServiceProvider
      */
     private function autoRegistersMiddleware(): bool
     {
-        return (bool) config('nova-password-rotation.enabled')
+        return (bool) config('laravel-password-rotation.enabled')
             && (bool) config('nova-password-rotation.auto_register_middleware');
     }
 
@@ -118,11 +108,11 @@ class NovaPasswordRotationServiceProvider extends PackageServiceProvider
      */
     private function warnBeforeExpiry(ServingNova $event): void
     {
-        if (! config('nova-password-rotation.enabled')) {
+        if (! config('laravel-password-rotation.enabled')) {
             return;
         }
 
-        $warnDays = (int) config('nova-password-rotation.warn_days');
+        $warnDays = (int) config('laravel-password-rotation.warn_days');
 
         if ($warnDays <= 0) {
             return;

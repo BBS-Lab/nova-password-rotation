@@ -20,6 +20,10 @@ The rotatable subject is **not** tied to the `User` model: everything keys off t
 
 ![Forced password-change screen](art/forced-change.png)
 
+**Reset action** (`expiry_action: reset`) — instead of the in-panel form, a single button that emails a reset link and signs the user out:
+
+![Reset-link action screen](art/forced-reset.png)
+
 **Expiry warning** — a Nova notification while the password nears expiry:
 
 ![Expiry warning notification](art/expiry-warning.png)

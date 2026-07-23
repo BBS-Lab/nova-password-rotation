@@ -76,8 +76,10 @@
         "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
         "prepare": "@php vendor/bin/testbench package:discover --ansi",
         "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "clean-testbench-env": "@php -r \"@unlink('vendor/orchestra/testbench-core/laravel/.env');\"",
         "serve": [
             "Composer\\Config::disableProcessTimeout",
+            "@clean-testbench-env",
             "@build",
             "@php vendor/bin/testbench serve --ansi"
         ],

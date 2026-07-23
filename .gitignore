@@ -11,4 +11,4 @@ auth.json
 /coverage
 .phpunit.result.cache
 .phpunit.cache
-workbench/.env@
+workbench/.env

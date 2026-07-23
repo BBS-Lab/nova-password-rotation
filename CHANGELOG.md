@@ -2,6 +2,26 @@
 
 All notable changes to `bbs-lab/nova-password-rotation` will be documented in this file.
 
+## v2.0.0 - 2026-07-23
+
+**Breaking release.** The generic password-rotation domain now lives in the shared base package [`bbs-lab/laravel-password-rotation`](https://github.com/BBS-Lab/laravel-password-rotation), and this package builds its Nova layer on top. Please read the [upgrade guide](UPGRADE.md).
+
+### ⚠️ Breaking changes
+
+- **Rotation config keys moved** from `nova-password-rotation.*` to `laravel-password-rotation.*` (same nine keys, same env vars) — republish the base config. The Nova-specific keys (`auto_register_middleware`, `route_prefix`, `expiry_action`) stay in `config/nova-password-rotation.php`.
+- The `password_histories` table is now owned and **auto-migrated** by the base package; the user-column migration publish tag is now `laravel-password-rotation-user-migration`.
+- Overridden `validation.*` translations now live under the `laravel-password-rotation::` namespace.
+
+### ✨ New: `expiry_action`
+
+- `change` (default) — the in-panel forced change-password form, unchanged.
+- `reset` — a single "send reset link" button that emails a password-reset link (pointing at Nova's own reset page), signs the user out and redirects to the Nova login. Requires the model to implement `CanResetPassword` and a reset page — Nova password reset (`Nova::routes()->withPasswordResetRoutes()`) or a standard `password.reset` route.
+
+### 🧰 Under the hood
+
+- Depends on `bbs-lab/laravel-password-rotation: ^1.1`; the duplicated generic classes were removed.
+- 100% line coverage, PHPStan level 8, CI across Nova 4 & 5 × Laravel 11/12/13.
+
 ## v1.0.2 - 2026-07-23
 
 Compatibility & maintenance release — wider PHP support and CI coverage. Fully backward compatible.
@@ -68,6 +88,7 @@ PHP `^8.4` · Laravel Nova `^4.0 || ^5.0` · Laravel `^11.0 || ^12.0 || ^13.0`
 composer require bbs-lab/nova-password-rotation
 
 
+
 ```
 ```php
 use BBSLab\NovaPasswordRotation\Concerns\RotatesPassword;
@@ -78,6 +99,7 @@ class User extends Authenticatable implements MustRotatePassword
 {
     use RotatesPassword;
 }
+
 
 
 ```

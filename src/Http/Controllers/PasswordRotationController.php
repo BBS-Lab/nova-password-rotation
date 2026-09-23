@@ -31,7 +31,12 @@ class PasswordRotationController
             return redirect(Nova::path());
         }
 
-        return ViewFactory::make('nova-password-rotation::expired');
+        // The package view namespace is registered at runtime, so PHPStan cannot
+        // resolve it to a view-string; the view genuinely exists.
+        /** @var view-string $view */
+        $view = 'nova-password-rotation::expired';
+
+        return ViewFactory::make($view);
     }
 
     public function update(Request $request): RedirectResponse

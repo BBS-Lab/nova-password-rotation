@@ -23,6 +23,7 @@ class User extends Authenticatable implements MustRotatePassword
         'name',
         'email',
         'password',
+        'is_sso',
     ];
 
     /**
@@ -41,6 +42,7 @@ class User extends Authenticatable implements MustRotatePassword
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_sso' => 'boolean',
         ];
     }
 }

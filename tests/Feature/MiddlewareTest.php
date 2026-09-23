@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use BBSLab\LaravelPasswordRotation\Contracts\MustRotatePassword;
+use BBSLab\LaravelPasswordRotation\Facades\PasswordRotation;
 use BBSLab\NovaPasswordRotation\Http\Middleware\EnsurePasswordIsNotExpired;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
@@ -87,4 +88,21 @@ it('never traps the user on the way out (logout)', function (): void {
         ->get('/nova/logout')
         ->assertOk()
         ->assertSee('bye');
+});
+
+it('lets an expired user through when a bypass callback returns true', function (): void {
+    PasswordRotation::bypass(fn (): bool => true);
+
+    $this->actingAs(expiredUser())
+        ->get('/nova/panel')
+        ->assertOk()
+        ->assertSee('panel');
+});
+
+it('still redirects an expired user when the bypass callback returns false', function (): void {
+    PasswordRotation::bypass(fn (): bool => false);
+
+    $this->actingAs(expiredUser())
+        ->get('/nova/panel')
+        ->assertRedirect(route('nova-password-rotation.expired.show'));
 });

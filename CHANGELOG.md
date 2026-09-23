@@ -2,6 +2,16 @@
 
 All notable changes to `bbs-lab/nova-password-rotation` will be documented in this file.
 
+## v2.1.0 - 2026-09-23
+
+Honour the base package's `PasswordRotation::bypass()` hook so specific requests can skip the forced password change — e.g. **SSO users** whose password is owned by the identity provider. Backward compatible. Requires `bbs-lab/laravel-password-rotation ^1.2`.
+
+### ✨ Added
+
+- **Bypass support in the Nova middleware** — `EnsurePasswordIsNotExpired` consults `PasswordRotation::bypass()` before redirecting an expired user; any callback returning `true` lets the request through. The workbench demoes it with a seeded `is_sso` account (`sso@laravel.com` reaches Nova despite being expired).
+
+**Full Changelog**: https://github.com/BBS-Lab/nova-password-rotation/compare/v2.0.0...v2.1.0
+
 ## v2.0.0 - 2026-07-23
 
 **Breaking release.** The generic password-rotation domain now lives in the shared base package [`bbs-lab/laravel-password-rotation`](https://github.com/BBS-Lab/laravel-password-rotation), and this package builds its Nova layer on top. Please read the [upgrade guide](UPGRADE.md).
@@ -89,6 +99,7 @@ composer require bbs-lab/nova-password-rotation
 
 
 
+
 ```
 ```php
 use BBSLab\NovaPasswordRotation\Concerns\RotatesPassword;
@@ -99,6 +110,7 @@ class User extends Authenticatable implements MustRotatePassword
 {
     use RotatesPassword;
 }
+
 
 
 

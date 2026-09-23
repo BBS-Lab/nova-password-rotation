@@ -165,6 +165,24 @@ broker), signs the user out of the Nova guard (so the emailed guest link is reac
 the Nova login. Nova's login is a Vue SPA, so the "reset link sent" confirmation cannot be shown as a
 Nova toast — the email is the real signal.
 
+### Bypassing rotation (e.g. SSO users)
+
+Some users must never be forced through the change screen — SSO users, for instance, whose password
+lives in the identity provider. Register a bypass callback via the base package's `PasswordRotation`
+facade in a service provider's `boot()`; the Nova middleware honours it before redirecting:
+
+```php
+use BBSLab\LaravelPasswordRotation\Facades\PasswordRotation;
+use Illuminate\Http\Request;
+
+PasswordRotation::bypass(
+    fn (Request $request) => $request->hasSession() && $request->session()->get('sso') === true,
+);
+```
+
+Register the callback in code, **not** in config (a closure breaks `config:cache`), and guard
+`hasSession()` before reading the session. Requires `bbs-lab/laravel-password-rotation` `^1.2`.
+
 ### Reuse prevention
 
 When `history_count > 0`, every password change is hashed and stored in the polymorphic

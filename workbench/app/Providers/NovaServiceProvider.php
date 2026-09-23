@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Workbench\App\Providers;
 
+use BBSLab\LaravelPasswordRotation\Contracts\MustRotatePassword;
+use BBSLab\LaravelPasswordRotation\Facades\PasswordRotation;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Dashboard;
 use Laravel\Nova\Dashboards\Main;
@@ -17,6 +20,14 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function boot(): void
     {
         parent::boot();
+
+        // Demo of the bypass hook: exempt SSO-provisioned accounts from the forced
+        // rotation. The callback receives the request and the expired user; here it
+        // reads the seeded `is_sso` flag. A real app might instead read a session
+        // attribute set at SSO login: fn ($request) => $request->session()->get('sso').
+        PasswordRotation::bypass(
+            fn (Request $request, MustRotatePassword $user): bool => $user->is_sso === true,
+        );
     }
 
     protected function routes(): void

@@ -15,12 +15,20 @@ class DatabaseSeeder extends Seeder
      * end-to-end with `composer serve` (all passwords are "password").
      *
      * Log in as nova@laravel.com to be redirected straight to the forced
-     * change screen; log in as expiring@example.com to see the warning notice.
+     * change screen; log in as expiring@example.com to see the warning notice;
+     * log in as sso@laravel.com — expired too, but flagged is_sso, so the
+     * PasswordRotation::bypass() callback lets it reach Nova untouched.
      */
     public function run(): void
     {
         // The default login user — expired 100 days ago (rotation window is 90).
         $this->stamp('Laravel Nova', 'nova@laravel.com', now()->subDays(100));
+
+        // Expired like the user above, but flagged as an SSO account: the
+        // PasswordRotation::bypass() callback (see NovaServiceProvider) reads the
+        // is_sso attribute and lets this user reach Nova instead of the
+        // forced-change screen.
+        $this->stamp('SSO User', 'sso@laravel.com', now()->subDays(100), isSso: true);
 
         // Valid but within the 7-day warning window (expires in ~5 days).
         $this->stamp('Expiring Soon', 'expiring@example.com', now()->subDays(85));
@@ -36,13 +44,13 @@ class DatabaseSeeder extends Seeder
      * Create the user (if missing) and set its rotation timestamp without
      * triggering the RotatesPassword model hooks, so the state stays as given.
      */
-    private function stamp(string $name, string $email, ?CarbonInterface $changedAt): void
+    private function stamp(string $name, string $email, ?CarbonInterface $changedAt, bool $isSso = false): void
     {
         $user = User::query()->firstOrCreate(
             ['email' => $email],
             ['name' => $name, 'password' => 'password'],
         );
 
-        $user->forceFill(['password_changed_at' => $changedAt])->saveQuietly();
+        $user->forceFill(['password_changed_at' => $changedAt, 'is_sso' => $isSso])->saveQuietly();
     }
 }

@@ -2,6 +2,20 @@
 
 All notable changes to `bbs-lab/nova-password-rotation` will be documented in this file.
 
+## v2.3.0 - 2026-09-25
+
+Refinements to the forced-change screen. Backward compatible.
+
+### ✨ Added
+
+- **Brand logo** — the screen now shows the configured Nova brand logo (`config('nova.brand.logo')`, inline SVG or image URL, mirroring `Nova::logo()` on the login screen), falling back to the Nova name when none is set.
+
+### 🐛 Fixed
+
+- **Reveal-toggle layout** — Nova's compiled stylesheet only ships the utility classes Nova itself uses, so `pr-10` was absent and a field value could run under the eye toggle (most visibly on the Chrome-autofilled current-password field). The toggle layout is now defined in plain CSS, and the browser's own injected password buttons are hidden so only our toggle shows.
+
+**Full Changelog**: https://github.com/BBS-Lab/nova-password-rotation/compare/v2.2.0...v2.3.0
+
 ## v2.2.0 - 2026-09-25
 
 Two improvements to the forced-change screen. Backward compatible.
@@ -126,6 +140,7 @@ composer require bbs-lab/nova-password-rotation
 
 
 
+
 ```
 ```php
 use BBSLab\NovaPasswordRotation\Concerns\RotatesPassword;
@@ -136,6 +151,7 @@ class User extends Authenticatable implements MustRotatePassword
 {
     use RotatesPassword;
 }
+
 
 
 

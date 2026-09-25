@@ -56,6 +56,15 @@ describe('show', function (): void {
             ->assertDontSee(trans('nova-password-rotation::messages.reset_submit'));
     });
 
+    it('renders the configured Nova brand logo instead of the name', function (): void {
+        config(['nova.brand.logo' => __DIR__.'/../Fixtures/brand-logo.svg']);
+
+        $this->actingAs(reload(expiredRotatable()))
+            ->get(route('nova-password-rotation.expired.show'))
+            ->assertOk()
+            ->assertSee('<title>Brand</title>', escape: false);
+    });
+
     it('renders reveal toggles and a hidden username anchor in change mode', function (): void {
         config([
             'nova-password-rotation.expiry_action' => 'change',

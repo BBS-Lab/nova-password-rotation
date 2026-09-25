@@ -19,11 +19,88 @@
             document.documentElement.classList.add('dark')
         }
     </script>
+
+    <style>
+        /* This screen reuses Nova's compiled stylesheet, which only ships the
+           utility classes Nova itself uses — so the reveal toggle's layout is
+           defined here in plain CSS rather than relying on Tailwind utilities
+           (e.g. pr-10) that are absent from that build. */
+        .pr-field {
+            position: relative;
+        }
+
+        /* Room for the toggle so a value never runs under it. */
+        .pr-field input {
+            padding-right: 2.75rem !important;
+        }
+
+        .pr-toggle {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            padding: 0 0.75rem;
+            color: #9ca3af;
+            background: transparent;
+            border: 0;
+            cursor: pointer;
+        }
+
+        .pr-toggle:hover {
+            color: #6b7280;
+        }
+
+        .dark .pr-toggle:hover {
+            color: #d1d5db;
+        }
+
+        .pr-toggle svg {
+            height: 1.25rem;
+            width: 1.25rem;
+        }
+
+        /* Show only our own toggle: hide the browser-injected password controls
+           (Chrome's autofill key on the autofilled current-password field, Edge's
+           reveal eye) that would otherwise sit inside the field too. The
+           strong-password generator button is intentionally left intact. */
+        input::-webkit-credentials-auto-fill-button {
+            visibility: hidden;
+            display: none !important;
+            pointer-events: none;
+            margin: 0;
+            width: 0;
+            height: 0;
+        }
+
+        input::-ms-reveal,
+        input::-ms-clear {
+            display: none;
+        }
+
+        /* Keep a configured brand logo to a sensible size. */
+        .pr-brand-logo svg,
+        .pr-brand-logo img {
+            max-height: 3rem;
+            width: auto;
+        }
+    </style>
 </head>
 <body class="min-h-full text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-900">
 <div class="py-6 px-1 md:px-2 lg:px-6">
     <div class="mx-auto py-8 max-w-sm flex justify-center">
-        <h1 class="text-3xl font-bold text-center text-gray-900 dark:text-white">{{ $novaName }}</h1>
+        {{-- Use the configured Nova brand logo when set (inline SVG or an image
+             URL, mirroring Nova::logo() used on the login screen); otherwise fall
+             back to the Nova name. --}}
+        @php($novaLogo = \Laravel\Nova\Nova::logo())
+        @if (! empty($novaLogo) && \Illuminate\Support\Str::contains($novaLogo, '<svg'))
+            <div class="pr-brand-logo text-gray-900 dark:text-white">{!! $novaLogo !!}</div>
+        @elseif (! empty($novaLogo))
+            <img src="{{ $novaLogo }}" alt="{{ $novaName }}" class="pr-brand-logo">
+        @else
+            <h1 class="text-3xl font-bold text-center text-gray-900 dark:text-white">{{ $novaName }}</h1>
+        @endif
     </div>
 
     @if (config('nova-password-rotation.expiry_action') === 'reset')
@@ -96,14 +173,14 @@
         @if (config('laravel-password-rotation.require_current_password'))
             <div class="mb-6">
                 <label class="block mb-2" for="current_password">{{ trans('nova-password-rotation::messages.current_password') }}</label>
-                <div class="relative">
+                <div class="pr-field">
                     <input
                         id="current_password"
                         name="current_password"
                         type="password"
                         autocomplete="current-password"
                         required
-                        class="w-full form-control form-input form-control-bordered pr-10"
+                        class="w-full form-control form-input form-control-bordered"
                     >
                     <button
                         type="button"
@@ -112,7 +189,7 @@
                         aria-pressed="false"
                         aria-label="{{ trans('nova-password-rotation::messages.toggle_password') }}"
                         title="{{ trans('nova-password-rotation::messages.toggle_password') }}"
-                        class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
+                        class="pr-toggle"
                     >
                         <svg class="h-5 w-5" aria-hidden="true"><use href="#pr-eye"></use></svg>
                     </button>
@@ -122,14 +199,14 @@
 
         <div class="mb-6">
             <label class="block mb-2" for="password">{{ trans('nova-password-rotation::messages.new_password') }}</label>
-            <div class="relative">
+            <div class="pr-field">
                 <input
                     id="password"
                     name="password"
                     type="password"
                     autocomplete="new-password"
                     required
-                    class="w-full form-control form-input form-control-bordered pr-10"
+                    class="w-full form-control form-input form-control-bordered"
                 >
                 <button
                     type="button"
@@ -138,7 +215,7 @@
                     aria-pressed="false"
                     aria-label="{{ trans('nova-password-rotation::messages.toggle_password') }}"
                     title="{{ trans('nova-password-rotation::messages.toggle_password') }}"
-                    class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
+                    class="pr-toggle"
                 >
                     <svg class="h-5 w-5" aria-hidden="true"><use href="#pr-eye"></use></svg>
                 </button>
@@ -147,14 +224,14 @@
 
         <div class="mb-6">
             <label class="block mb-2" for="password_confirmation">{{ trans('nova-password-rotation::messages.confirm_password') }}</label>
-            <div class="relative">
+            <div class="pr-field">
                 <input
                     id="password_confirmation"
                     name="password_confirmation"
                     type="password"
                     autocomplete="new-password"
                     required
-                    class="w-full form-control form-input form-control-bordered pr-10"
+                    class="w-full form-control form-input form-control-bordered"
                 >
                 <button
                     type="button"
@@ -163,7 +240,7 @@
                     aria-pressed="false"
                     aria-label="{{ trans('nova-password-rotation::messages.toggle_password') }}"
                     title="{{ trans('nova-password-rotation::messages.toggle_password') }}"
-                    class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
+                    class="pr-toggle"
                 >
                     <svg class="h-5 w-5" aria-hidden="true"><use href="#pr-eye"></use></svg>
                 </button>

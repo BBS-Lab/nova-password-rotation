@@ -56,6 +56,15 @@ describe('show', function (): void {
             ->assertDontSee(trans('nova-password-rotation::messages.reset_submit'));
     });
 
+    it('injects the configured Nova brand colors so controls match branding', function (): void {
+        config(['nova.brand.colors' => ['500' => '10,20,30']]);
+
+        $this->actingAs(reload(expiredRotatable()))
+            ->get(route('nova-password-rotation.expired.show'))
+            ->assertOk()
+            ->assertSee('--colors-primary-500: 10,20,30', escape: false);
+    });
+
     it('renders the configured Nova brand logo instead of the name', function (): void {
         config(['nova.brand.logo' => __DIR__.'/../Fixtures/brand-logo.svg']);
 

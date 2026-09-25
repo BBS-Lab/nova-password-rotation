@@ -14,6 +14,11 @@
         <link rel="stylesheet" href="{{ mix('app.css', 'vendor/nova') }}">
     @endif
 
+    {{-- Override Nova's default primary palette with the configured brand colors,
+         so primary-coloured controls (the submit button) match branding like the
+         rest of Nova. Placed after app.css so the :root override wins. --}}
+    <style>{!! \Laravel\Nova\Nova::brandColorsCSS() !!}</style>
+
     <script>
         if (localStorage.novaTheme === 'dark' || (!('novaTheme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark')

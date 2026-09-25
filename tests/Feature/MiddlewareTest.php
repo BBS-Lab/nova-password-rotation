@@ -106,3 +106,23 @@ it('still redirects an expired user when the bypass callback returns false', fun
         ->get('/nova/panel')
         ->assertRedirect(route('nova-password-rotation.expired.show'));
 });
+
+it('works when the Nova path is root ("/") — the guards are route-name based, not path based', function (): void {
+    config(['nova.path' => '/']);
+
+    Route::middleware(['web', EnsurePasswordIsNotExpired::class])->group(function (): void {
+        Route::get('/panel', fn () => 'panel');
+        Route::get('/password-rotation/probe', fn () => 'ours')->name('nova-password-rotation.probe');
+    });
+
+    // Expired user on a normal page is still redirected to the change screen…
+    $this->actingAs(expiredUser())
+        ->get('/panel')
+        ->assertRedirect(route('nova-password-rotation.expired.show'));
+
+    // …and never trapped on one of the package's own routes.
+    $this->actingAs(expiredUser())
+        ->get('/password-rotation/probe')
+        ->assertOk()
+        ->assertSee('ours');
+});

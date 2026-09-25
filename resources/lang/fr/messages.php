@@ -14,6 +14,8 @@ return [
 
     'confirm_password' => 'Confirmez le nouveau mot de passe',
 
+    'toggle_password' => 'Afficher ou masquer le mot de passe',
+
     'submit' => 'Mettre à jour le mot de passe',
 
     'updated' => 'Votre mot de passe a été mis à jour.',

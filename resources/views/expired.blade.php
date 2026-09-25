@@ -53,6 +53,34 @@
     >
         @csrf
 
+        {{-- Password-manager anchor: a hidden username lets Chrome recognise this
+             as a change-password form for a known account, so saved-password
+             autofill and the strong-password generator target the right fields
+             and do not overwrite the current-password field. See the Chromium
+             "Create Amazing Password Forms" guidance. --}}
+        @php($rotationUser = \Laravel\Nova\Nova::user(request()))
+        <input
+            type="text"
+            name="username"
+            autocomplete="username"
+            value="{{ $rotationUser?->email ?? '' }}"
+            tabindex="-1"
+            aria-hidden="true"
+            readonly
+            style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;"
+        >
+
+        {{-- Eye icons shared by every reveal toggle below (defined once). --}}
+        <svg class="hidden" aria-hidden="true">
+            <symbol id="pr-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            </symbol>
+            <symbol id="pr-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+            </symbol>
+        </svg>
+
         <h2 class="text-2xl text-center font-normal mb-6">{{ trans('nova-password-rotation::messages.title') }}</h2>
 
         <p class="mb-6 text-center">{{ trans('nova-password-rotation::messages.intro') }}</p>
@@ -68,39 +96,78 @@
         @if (config('laravel-password-rotation.require_current_password'))
             <div class="mb-6">
                 <label class="block mb-2" for="current_password">{{ trans('nova-password-rotation::messages.current_password') }}</label>
-                <input
-                    id="current_password"
-                    name="current_password"
-                    type="password"
-                    autocomplete="current-password"
-                    required
-                    class="w-full form-control form-input form-control-bordered"
-                >
+                <div class="relative">
+                    <input
+                        id="current_password"
+                        name="current_password"
+                        type="password"
+                        autocomplete="current-password"
+                        required
+                        class="w-full form-control form-input form-control-bordered pr-10"
+                    >
+                    <button
+                        type="button"
+                        data-password-toggle="current_password"
+                        aria-controls="current_password"
+                        aria-pressed="false"
+                        aria-label="{{ trans('nova-password-rotation::messages.toggle_password') }}"
+                        title="{{ trans('nova-password-rotation::messages.toggle_password') }}"
+                        class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
+                    >
+                        <svg class="h-5 w-5" aria-hidden="true"><use href="#pr-eye"></use></svg>
+                    </button>
+                </div>
             </div>
         @endif
 
         <div class="mb-6">
             <label class="block mb-2" for="password">{{ trans('nova-password-rotation::messages.new_password') }}</label>
-            <input
-                id="password"
-                name="password"
-                type="password"
-                autocomplete="new-password"
-                required
-                class="w-full form-control form-input form-control-bordered"
-            >
+            <div class="relative">
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autocomplete="new-password"
+                    required
+                    class="w-full form-control form-input form-control-bordered pr-10"
+                >
+                <button
+                    type="button"
+                    data-password-toggle="password"
+                    aria-controls="password"
+                    aria-pressed="false"
+                    aria-label="{{ trans('nova-password-rotation::messages.toggle_password') }}"
+                    title="{{ trans('nova-password-rotation::messages.toggle_password') }}"
+                    class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
+                >
+                    <svg class="h-5 w-5" aria-hidden="true"><use href="#pr-eye"></use></svg>
+                </button>
+            </div>
         </div>
 
         <div class="mb-6">
             <label class="block mb-2" for="password_confirmation">{{ trans('nova-password-rotation::messages.confirm_password') }}</label>
-            <input
-                id="password_confirmation"
-                name="password_confirmation"
-                type="password"
-                autocomplete="new-password"
-                required
-                class="w-full form-control form-input form-control-bordered"
-            >
+            <div class="relative">
+                <input
+                    id="password_confirmation"
+                    name="password_confirmation"
+                    type="password"
+                    autocomplete="new-password"
+                    required
+                    class="w-full form-control form-input form-control-bordered pr-10"
+                >
+                <button
+                    type="button"
+                    data-password-toggle="password_confirmation"
+                    aria-controls="password_confirmation"
+                    aria-pressed="false"
+                    aria-label="{{ trans('nova-password-rotation::messages.toggle_password') }}"
+                    title="{{ trans('nova-password-rotation::messages.toggle_password') }}"
+                    class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
+                >
+                    <svg class="h-5 w-5" aria-hidden="true"><use href="#pr-eye"></use></svg>
+                </button>
+            </div>
         </div>
 
         <button
@@ -112,5 +179,23 @@
     </form>
     @endif
 </div>
+
+<script>
+    // Toggle a password field between hidden and clear text, swapping the eye icon.
+    document.querySelectorAll('[data-password-toggle]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var input = document.getElementById(button.getAttribute('data-password-toggle'));
+
+            if (! input) {
+                return;
+            }
+
+            var reveal = input.type === 'password';
+            input.type = reveal ? 'text' : 'password';
+            button.setAttribute('aria-pressed', reveal ? 'true' : 'false');
+            button.querySelector('use').setAttribute('href', reveal ? '#pr-eye-off' : '#pr-eye');
+        });
+    });
+</script>
 </body>
 </html>

@@ -56,6 +56,20 @@ describe('show', function (): void {
             ->assertDontSee(trans('nova-password-rotation::messages.reset_submit'));
     });
 
+    it('renders reveal toggles and a hidden username anchor in change mode', function (): void {
+        config([
+            'nova-password-rotation.expiry_action' => 'change',
+            'laravel-password-rotation.require_current_password' => true,
+        ]);
+
+        $this->actingAs(reload(expiredRotatable()))
+            ->get(route('nova-password-rotation.expired.show'))
+            ->assertOk()
+            ->assertSee('data-password-toggle="password"', escape: false)
+            ->assertSee('data-password-toggle="current_password"', escape: false)
+            ->assertSee('autocomplete="username"', escape: false);
+    });
+
     it('shows a reset-link card with no password fields in reset mode', function (): void {
         config(['nova-password-rotation.expiry_action' => 'reset']);
 

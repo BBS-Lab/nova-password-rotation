@@ -14,6 +14,8 @@ return [
 
     'confirm_password' => 'Confirm new password',
 
+    'toggle_password' => 'Show or hide password',
+
     'submit' => 'Update password',
 
     'updated' => 'Your password has been updated.',

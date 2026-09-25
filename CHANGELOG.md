@@ -2,6 +2,20 @@
 
 All notable changes to `bbs-lab/nova-password-rotation` will be documented in this file.
 
+## v2.2.0 - 2026-09-25
+
+Two improvements to the forced-change screen. Backward compatible.
+
+### ✨ Added
+
+- **Reveal toggle** — an eye button on each password field (current, new, confirm) toggles clear-text display.
+
+### 🐛 Fixed
+
+- **Chrome autofill** — a hidden `username` anchor (with the existing `current-password`/`new-password` tokens) stops Chrome's saved-password autofill and strong-password generator from overwriting the current-password field.
+
+**Full Changelog**: https://github.com/BBS-Lab/nova-password-rotation/compare/v2.1.1...v2.2.0
+
 ## v2.1.1 - 2026-09-23
 
 Patch release — CI/static-analysis only, **no runtime change**. Fully compatible with `v2.1.0`.
@@ -111,6 +125,7 @@ composer require bbs-lab/nova-password-rotation
 
 
 
+
 ```
 ```php
 use BBSLab\NovaPasswordRotation\Concerns\RotatesPassword;
@@ -121,6 +136,7 @@ class User extends Authenticatable implements MustRotatePassword
 {
     use RotatesPassword;
 }
+
 
 
 

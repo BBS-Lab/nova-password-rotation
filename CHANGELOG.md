@@ -2,6 +2,16 @@
 
 All notable changes to `bbs-lab/nova-password-rotation` will be documented in this file.
 
+## v2.3.1 - 2026-09-25
+
+Patch release. Backward compatible.
+
+### 🐛 Fixed
+
+- **Brand colour on the change screen** — the forced-change screen now injects `Nova::brandColorsCSS()` (after `app.css`), so its primary-coloured submit button uses the configured `nova.brand.colors` instead of Nova's default blue, mirroring the login screen. Falls back to the default when no brand colour is set.
+
+**Full Changelog**: https://github.com/BBS-Lab/nova-password-rotation/compare/v2.3.0...v2.3.1
+
 ## v2.3.0 - 2026-09-25
 
 Refinements to the forced-change screen. Backward compatible.
@@ -141,6 +151,7 @@ composer require bbs-lab/nova-password-rotation
 
 
 
+
 ```
 ```php
 use BBSLab\NovaPasswordRotation\Concerns\RotatesPassword;
@@ -151,6 +162,7 @@ class User extends Authenticatable implements MustRotatePassword
 {
     use RotatesPassword;
 }
+
 
 
 
